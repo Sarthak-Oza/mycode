@@ -2,7 +2,7 @@
 
 import time
 import threading
-import msvcrt # available only on windows
+import msvcrt
 
 # countdown when player in kicthen, to avoid locking the kitchen
 countdown_completed = False
@@ -28,6 +28,9 @@ class Player:
 
     def get_inventory(self):
        return self.inventory
+    
+    def get_energy(self):
+       return self.energy
 
 
 # Start the player in the Hall
@@ -79,7 +82,7 @@ def showStatus():
   print('Inventory : ' + str(player.inventory))
   #print an item if there is one
   if rooms[currentRoom]["item"]:
-    print('You see ' + ', '.join(rooms[currentRoom]['item']))
+    print('You see: ' + ', '.join(rooms[currentRoom]['item']))
 
   # Print the player's energy
   print(f'Energy: {player.energy}')
@@ -108,8 +111,6 @@ def countdown():
     t.start()
     # wait for the thread to finish
     t.join()
-
-inventory = []
 
 rooms = {
     'Hall': {
@@ -177,7 +178,12 @@ while True:
       print(move[1] + ' got!')
       #remove the item from the room
       rooms[currentRoom]['item'].remove(move[1])
-    #otherwise, if the item isn't there to get
+    
+      # if get potion, energize player by 50 if not already 100
+      if move[1] == "potion":
+         if player.get_energy() < 100:
+            player.energize(50)
+            print("Got 50 more energy!")
 
     #increase moves counter
       moves_counter += 1
@@ -197,32 +203,24 @@ while True:
   
   # if e not pressed while in Kitchen, player will be locked in the room and lost the game
   if countdown_completed:
-     print("You have been locked in the dining room, You Lost!!")
+     print("You have been locked in the kitchen, You Lost!!")
      break
   
-  # if monster in room, check if player has enough energy to defeat it
+  # Check if player has enough energy to defeat a potential monster
   if currentRoom in rooms and 'monster' in rooms[currentRoom]['item']:
-        if player.energy >= 50:
-            print('A monster is in the room, but you have enough energy to defeat it, reducing energy by 50!')
-            player.deenergize(50)
-            rooms[currentRoom]['item'].remove('monster')
-            
-        else:
-            print('A monster is in the room, but you do not have enough energy to defeat it. You were killed by the monster. Game Over!')
-            break
-
-  
-  # check if player has a key to escape and enough energy to defeat monster
-  if currentRoom == 'Garden' and 'key' in player.inventory:
     if player.energy >= 50:
-       print('You escaped the house with the ultra rare key and magic potion... YOU WIN!')
-       print(f"Total Moves: {moves_counter}")
-       break
+        print('A monster is in the room, but you have enough energy to defeat it.')
+        player.deenergize(50)
+        rooms[currentRoom]['item'].remove('monster')
     else:
-       print("Monster has got you since you don not have enough enrgy to defeat it!")
-       break
-  
-  # if player does not have a key, can not escape
-  elif currentRoom == 'Garden' and 'key' not in player.inventory:
-    print('You need a key to escape!!')
-    print(f"Total Moves: {moves_counter}")
+        print('A monster is in the room, but you do not have enough energy to defeat it. You were killed by the monster. Game Over!')
+        break
+
+# Check if player has the key to escape (only in the 'Garden' room)
+  if currentRoom == 'Garden':
+    if 'key' in player.inventory:
+        print('You escaped the house with the ultra-rare key and magic potion... YOU WIN!')
+        print(f"Total Moves: {moves_counter}")
+        break
+    else:
+        print('You need a key to escape!')
