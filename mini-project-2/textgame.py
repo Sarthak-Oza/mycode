@@ -2,7 +2,7 @@
 
 import time
 import threading
-import msvcrt
+import msvcrt # available only on windows
 
 # countdown when player in kicthen, to avoid locking the kitchen
 countdown_completed = False
