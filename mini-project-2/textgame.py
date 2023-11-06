@@ -3,35 +3,12 @@
 import time
 import threading
 import msvcrt
+from roomsmap import printMap
+from rooms import rooms
+from player import Player
 
 # countdown when player in kicthen, to avoid locking the kitchen
 countdown_completed = False
-
-class Player:
-    def __init__(self, name, initial_energy=100):
-        self.name = name
-        self.energy = initial_energy
-        self.inventory = []
-
-    def energize(self, energy_increase):
-        self.energy += energy_increase
-
-    def deenergize(self, energy_decrease):
-        self.energy -= energy_decrease
-    
-    def add_to_inventory(self, item):
-        self.inventory.append(item)
-
-    def remove_from_inventory(self, item):
-        if item in self.inventory:
-            self.inventory.remove(item)
-
-    def get_inventory(self):
-       return self.inventory
-    
-    def get_energy(self):
-       return self.energy
-
 
 # Start the player in the Hall
 currentRoom = 'Hall'
@@ -42,24 +19,6 @@ player = Player(player_name)
 
 #total number of moves
 moves_counter = 0
-
-def printMap():
-    rooms_map = '''
-        +---------------------+         +---------------------+
-        |       Hall          |         |       Dining Room   |
-        | Exits: south, east  |    E->  | Exits: south, west  |
-        | Items: key          |    <-W  | Items: monster      |
-        +---------------------+         +---------------------+
-                N   |                           N  |
-                |   S                           |  S
-        +---------------------+         +---------------------+
-        |       Kitchen       |         |       Garden        |
-        | Exits: north        |         | Exits: north        |
-        | Items: knife, potion|         | Items: monster      |
-        +---------------------+         +---------------------+
-    '''
-
-    print(rooms_map)
 
 def showInstructions():
   #print a main menu and the commands
@@ -112,26 +71,7 @@ def countdown():
     # wait for the thread to finish
     t.join()
 
-rooms = {
-    'Hall': {
-        'south': 'Kitchen',
-        'east': 'Dining Room',
-        'item': ['key']
-    },
-    'Kitchen': {
-        'north': 'Hall',
-        'item': ['knife', 'potion']
-    },
-    'Dining Room': {
-        'west': 'Hall',
-        'south': 'Garden',
-        'item': ['monster']
-    },
-    'Garden': {
-        'north': 'Dining Room',
-        'item': ['monster']
-    }
-}
+
 
 
 printMap()
@@ -219,7 +159,7 @@ while True:
 # Check if player has the key to escape (only in the 'Garden' room)
   if currentRoom == 'Garden':
     if 'key' in player.inventory:
-        print('You escaped the house with the ultra-rare key and magic potion... YOU WIN!')
+        print('You escaped the house with the key, you WON!!')
         print(f"Total Moves: {moves_counter}")
         break
     else:
