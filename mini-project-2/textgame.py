@@ -44,8 +44,8 @@ def printMap():
     rooms_map = '''
         +---------------------+         +---------------------+
         |       Hall          |         |       Dining Room   |
-        | Exits: south, east  |    W->  | Exits: south, west  |
-        | Items: key          |    <-E  | Items: monster      |
+        | Exits: south, east  |    E->  | Exits: south, west  |
+        | Items: key          |    <-W  | Items: monster      |
         +---------------------+         +---------------------+
                 N   |                           N  |
                 |   S                           |  S
@@ -73,6 +73,7 @@ def showStatus():
   #print the player's current status
   print('---------------------------')
   print('You are in the ' + currentRoom)
+  #getting directions player can go to 
   print("You can go to " + " or ".join([key for key in rooms[currentRoom].keys() if key in {"north", "south", "east", "west"}]))
   #print the current inventory
   print('Inventory : ' + str(player.inventory))
