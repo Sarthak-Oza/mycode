@@ -71,9 +71,6 @@ def countdown():
     # wait for the thread to finish
     t.join()
 
-
-
-
 printMap()
 showInstructions()
 
