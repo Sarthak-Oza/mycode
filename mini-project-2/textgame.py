@@ -120,6 +120,7 @@ def initialize_game():
     )
     showInstructions()
 
+initialize_game()
 
 # --------------------------------------------------------------------  main function to play game  ------------------------------------------------------------------------
 def play_game():
