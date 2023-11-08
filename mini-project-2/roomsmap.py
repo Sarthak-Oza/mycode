@@ -1,19 +1,22 @@
 def printMap():
-    rooms_map = '''
+    rooms_map = """
 
                ****         GAME MAP    ****
         +---------------------+         +---------------------+
-        |       Hall          |         |       Dining Room   |
+        | Hall (Start here)   |         |    Dining Room      |
         | Exits: south, east  |    E->  | Exits: south, west  |
-        | Items: key          |    <-W  | Items: monster      |
+        | Items: key, bullets |    <-W  | Items: monster      |
         +---------------------+         +---------------------+
                 N   |                           N  |
                 |   S                           |  S
         +---------------------+         +---------------------+
         |       Kitchen       |         |       Garden        |
         | Exits: north        |         | Exits: north        |
-        | Items: knife, potion|         | Items: monster      |
+        | Items: gun, potion  |         | Items: monster      |
         +---------------------+         +---------------------+
-    '''
+                                                    |
+                                                   Exit
+                                                
+    """
 
     print(rooms_map)
