@@ -1,18 +1,11 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>File Upload</title>
-</head>
-<body>
-    <h1>File Storage</h1>
+{% include 'navbar.html' %}
     
-    <!-- File upload form -->
     <form method="POST" enctype="multipart/form-data">
         <input type="file" name="file">
         <input type="submit" value="Upload">
     </form>
     
-    <!-- List of uploaded files with download links and actions -->
+    
     <h2>Files</h2>
     <ul>
         {% for file in files %}
@@ -63,7 +56,7 @@
         const renameInput = document.getElementById(filename + '_rename');
         const renameButton = document.getElementById(filename + '_save');
 
-        // Toggle the visibility of the input field and "Save" button
+        // Toggle input field and Save button
         if (renameInput.style.display === 'none' || renameInput.style.display === '') {
             renameInput.style.display = 'block';
             renameButton.style.display = 'block';
@@ -96,8 +89,8 @@
     .then(data => {
         console.log(data)
         toggleRenameInput(data["filename"]);
-        window.location.href = `/`;  // Redirect to the root URL
-        // You can also update the file name in the UI if needed using 'data.filename'
+        window.location.href = `/files`; 
+
     })
     .catch(error => {
         console.log(error)
@@ -119,7 +112,7 @@
             })
             .then(response => {
                 if (response.status === 200) {
-                    window.location.href = '/';
+                    window.location.href = '/files';
                 }
             })
             .catch(error => console.error("Error while deleting file:", error));
@@ -128,5 +121,3 @@
     
     </script>
     
-</body>
-</html>
