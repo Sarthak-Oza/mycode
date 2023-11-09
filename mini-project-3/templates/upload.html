@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>File Upload</title>
+</head>
+<body>
+    <h1>File Storage</h1>
+    
+    <!-- File upload form -->
+    <form method="POST" enctype="multipart/form-data">
+        <input type="file" name="file">
+        <input type="submit" value="Upload">
+    </form>
+    
+    <!-- List of uploaded files with download links and actions -->
+    <h2>Files</h2>
+    <ul>
+        {% for file in files %}
+            <li>
+                <span>{{ file[1] }}</span>
+                <a href="{{ url_for('download_file', filename=file[1]) }}" download>Download</a>
+                <a href="javascript:void(0);" onclick="fetchDetails('{{ file[1] }}')">Details</a>
+                <a href="javascript:void(0);" onclick="toggleRenameInput('{{ file[1] }}')">Edit</a>
+                <a href="javascript:void(0);" onclick="deleteFile('{{ file[1] }}')">Delete</a>
+                <div id="{{ file[1] }}_details" style="display: none;">
+                    <p>Name: <span id="{{ file[1] }}_name"></span></p>
+                    <p>Uploaded At: <span id="{{ file[1] }}_timestamp"></span></p>
+                    <p>Size: <span id="{{ file[1] }}_size"></span> bytes</p>
+                </div>
+                <input type="text" id="{{ file[1] }}_rename" style="display: none;">
+                <a href="javascript:void(0);" id="{{ file[1] }}_save"onclick="renameFile('{{ file[1] }}')" style="display: none;">Save</a>
+            </li>
+        {% endfor %}
+    </ul>
+
+    <script>
+        function fetchDetails(filename) {
+            console.log(filename)
+            const detailsDiv = document.getElementById(filename + '_details');
+            const nameSpan = document.getElementById(filename + '_name');
+            const timestampSpan = document.getElementById(filename + '_timestamp');
+            const sizeSpan = document.getElementById(filename + '_size');
+    
+            // Check the current display style of the details div
+            if (detailsDiv.style.display === 'none') {
+                // If it's hidden, fetch the details and show the div
+                fetch(`/details/${filename}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        nameSpan.textContent = data.filename;
+                        timestampSpan.textContent = data.timestamp + " UTC";
+                        sizeSpan.textContent = data.size;
+                        detailsDiv.style.display = 'block';
+                    })
+                    .catch(error => console.error("Data error"));
+            } else {
+                // If it's visible, hide the div
+                detailsDiv.style.display = 'none';
+            }
+        }
+
+        function toggleRenameInput(filename) {
+        const renameInput = document.getElementById(filename + '_rename');
+        const renameButton = document.getElementById(filename + '_save');
+
+        // Toggle the visibility of the input field and "Save" button
+        if (renameInput.style.display === 'none' || renameInput.style.display === '') {
+            renameInput.style.display = 'block';
+            renameButton.style.display = 'block';
+        } else {
+            renameInput.style.display = 'none';
+            renameButton.style.display = 'none';
+        }
+    }
+
+    function renameFile(filename) {
+    const editInput = document.getElementById(filename + '_rename');
+    const newFilename = editInput.value;
+
+    if (newFilename) {
+        // Send a PUT request to edit the file name on the server
+        fetch(`/edit/${filename}`, {
+        method: 'PUT',
+        body: new URLSearchParams({ new_filename: newFilename }),
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+    })
+    .then(response => {
+        if (response.status === 200) {
+            return response.json();
+        } else {
+            throw new Error("Editing file name failed.");
+        }
+    })
+    .then(data => {
+        console.log(data)
+        toggleRenameInput(data["filename"]);
+        window.location.href = `/`;  // Redirect to the root URL
+        // You can also update the file name in the UI if needed using 'data.filename'
+    })
+    .catch(error => {
+        console.log(error)
+    });
+    } else {
+        alert("Please provide a new file name!")
+    }
+
+    
+}
+
+    function deleteFile(filename) {
+        const confirmation = confirm('Are you sure you want to delete this file?');
+
+        if (confirmation) {
+            console.log("fetvhoing delete")
+            fetch(`/delete/${filename}`, {
+                method: 'DELETE',
+            })
+            .then(response => {
+                if (response.status === 200) {
+                    window.location.href = '/';
+                }
+            })
+            .catch(error => console.error("Error while deleting file:", error));
+        }
+    }
+    
+    </script>
+    
+</body>
+</html>
