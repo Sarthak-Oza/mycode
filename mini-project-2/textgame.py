@@ -110,8 +110,6 @@ The kitchen door will be locked automatically in 5 seconds if you don't press th
         """
     )
 
-initialize_game()
-
 # --------------------------------------------------------------------  main function to play game  ------------------------------------------------------------------------
 def play_game():
     global currentRoom, player_name, moves_counter, gun
@@ -155,7 +153,7 @@ def play_game():
                     else:
                         print("*** You do not need it, you already have enough energy! ***")
                         continue
-
+                
                 if move[1] == "gun":
                     gun = Gun()
                     player.add_to_inventory(gun)
@@ -177,6 +175,7 @@ def play_game():
                         print("*** You need a gun to load bullets! ***\n")
                         continue
 
+                # adding to inventory
                 player.inventory += [move[1]]
 
                 print(f"*** {move[1]} added to inventory! ***\n")
@@ -211,9 +210,10 @@ def play_game():
                 # bullets need to kill monster
                 monster_kill_bullets = random.randint(4, 7)
 
-                print("Fighting with the monster!")
+                print("Fighting with the monster...........")
                 time.sleep(3)
 
+                # get gun from player's inventory 
                 gun_item = next(
                     item for item in player.get_inventory() if isinstance(item, Gun)
                 )
@@ -247,4 +247,5 @@ def play_game():
 
 
 if __name__ == "__main__":
+    initialize_game()
     play_game()
