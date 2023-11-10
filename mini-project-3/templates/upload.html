@@ -1,27 +1,48 @@
 {% include 'navbar.html' %}
     
-    <form method="POST" enctype="multipart/form-data">
-        <input type="file" name="file">
-        <input type="submit" value="Upload">
+    <form method="POST" enctype="multipart/form-data" action="{{ url_for('upload_and_list_files') }}">
+        <input class="form-control" type="file" name="file">
+        <!-- checking for flash messages -->
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                
+                        {% for message in messages %}
+                        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                            <strong>{{ message }}</strong> 
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                          </div>
+                        {% endfor %}
+                
+            {% endif %}
+        {% endwith %}
+        <input class="btn btn-primary" type="submit" value="Upload">
     </form>
-    
-    
-    <h2>Files</h2>
+
+    <h2>My Files</h2>
     <ul>
         {% for file in files %}
-            <li>
-                <span>{{ file[1] }}</span>
-                <a href="{{ url_for('download_file', filename=file[1]) }}" download>Download</a>
-                <a href="javascript:void(0);" onclick="fetchDetails('{{ file[1] }}')">Details</a>
-                <a href="javascript:void(0);" onclick="toggleRenameInput('{{ file[1] }}')">Edit</a>
-                <a href="javascript:void(0);" onclick="deleteFile('{{ file[1] }}')">Delete</a>
-                <div id="{{ file[1] }}_details" style="display: none;">
+            <li class="file-item">
+                <div>
+                    <span class="fs-3">{{ file[1] }}</span>
+                <div id="{{ file[1] }}_details" style="display: none; ">
                     <p>Name: <span id="{{ file[1] }}_name"></span></p>
                     <p>Uploaded At: <span id="{{ file[1] }}_timestamp"></span></p>
-                    <p>Size: <span id="{{ file[1] }}_size"></span> bytes</p>
+                    <p>Size: <span id="{{ file[1] }}_size"></span> KB</p>
                 </div>
-                <input type="text" id="{{ file[1] }}_rename" style="display: none;">
-                <a href="javascript:void(0);" id="{{ file[1] }}_save"onclick="renameFile('{{ file[1] }}')" style="display: none;">Save</a>
+                </div>
+                <div>
+                    <div class="alert alert-warning alert-dismissible fade show" role="alert" style="display: none;" id="rename-error">
+                        <strong>Please enter new file name</strong> 
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                      </div>
+                    <input type="text" id="{{ file[1] }}_rename" style="display: none;" placeholder="Enter New File Name" >
+                    <a href="javascript:void(0);" id="{{ file[1] }}_save"onclick="renameFile('{{ file[1] }}')" style="display: none;" class="btn btn-success">Save</a>
+                    <a href="{{ url_for('download_file', filename=file[1]) }}" download class="btn btn-primary">Download</a>
+                    <a href="javascript:void(0);" onclick="fetchDetails('{{ file[1] }}')" class="btn btn-primary">Details</a>
+                    <a href="javascript:void(0);" onclick="toggleRenameInput('{{ file[1] }}')" class="btn btn-primary">Edit</a>
+                    <a href="javascript:void(0);" onclick="deleteFile('{{ file[1] }}')" class="btn btn-danger">Delete</a>
+                    
+                </div>
             </li>
         {% endfor %}
     </ul>
@@ -70,36 +91,44 @@
     const editInput = document.getElementById(filename + '_rename');
     const newFilename = editInput.value;
 
-    if (newFilename) {
+
+        console.log(filename)
+    
         // Send a PUT request to edit the file name on the server
         fetch(`/edit/${filename}`, {
         method: 'PUT',
-        body: new URLSearchParams({ new_filename: newFilename }),
+        body: JSON.stringify({ new_filename: newFilename }),
         headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-        },
+            'Content-Type': 'application/json',
+    },
     })
     .then(response => {
-        if (response.status === 200) {
+        if (response.ok) {
+            console.log("here")
             return response.json();
         } else {
-            throw new Error("Editing file name failed.");
+            console.log("Error!")
+            // const renameError = document.getElementById("rename-error")
+            
+            // renameError.style.display = "block";
+            
+
+            // window.location.href = `/files`; 
         }
     })
     .then(data => {
         console.log(data)
-        toggleRenameInput(data["filename"]);
+        // checking for empty data object
+        if (Object.keys(data).length !== 0) {
+            
+            toggleRenameInput(data["filename"]);
+        }
         window.location.href = `/files`; 
 
     })
     .catch(error => {
         console.log(error)
     });
-    } else {
-        alert("Please provide a new file name!")
-    }
-
-    
 }
 
     function deleteFile(filename) {
