@@ -30,21 +30,25 @@ def ask_question(question, options):
                 print(f"{Fore.RED}\n######## Invalid input. Please try again, enter a valid option {CHOICE_MIN}-{CHOICE_MAX}. ########{Style.RESET_ALL}")
 
 def determine_age(answers):
+    # logic to calcualte age
     calculated_age = int(average(list(answer * 15 for answer in answers)))
     return calculated_age
 
 def main():
     while True:
+        # clear screen before starting quiz
         system("clear")
         print(f"{Fore.YELLOW}{Back.CYAN}{'#' * 19} Welcome to the 'What Age Are You?' Quiz! {'#' * 19}{Style.RESET_ALL}\n")
         print(f"{Fore.YELLOW}{Back.CYAN}{'#' * 8} Answer the following questions to find out your age mentality. {'#' * 8}{Style.RESET_ALL}\n")
 
-
+        # list to store user answer inputs
         answers = []
     
+        # loop over each question
         for question, options in questions.items():
             choice = ask_question(question, options)
             answers.append(choice)
+            # clear screen after each question 
             system("clear")
 
         result = determine_age(answers)
