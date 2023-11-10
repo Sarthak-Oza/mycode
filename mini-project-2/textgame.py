@@ -2,7 +2,7 @@
 
 import time
 import threading
-import msvcrt
+import curses
 import os
 import random
 from roomsmap import printMap
@@ -29,12 +29,12 @@ def showInstructions():
     # print a main menu and the commands
     print(
         """
-            RPG Game
-            ========
-            Commands:
-            go [direction]
-            get [item]
-            quit
+RPG Game
+========
+Commands:
+go [direction]
+get [item]
+quit
         """
     )
 
@@ -81,23 +81,25 @@ def showStatus():
     print(f"Total Moves: {moves_counter}")
     print("---------------------------")
 
-
-# function to close the room walls/door
 def crushing_walls():
-    global countdown_completed
+    global countdown_completed, moves_counter
+    countdown_completed = False
+
+    stdscr = curses.initscr()
+    stdscr.nodelay(1)  # Set non-blocking mode for keyboard input
     for i in range(5, 0, -1):
-        print(
-            "Time left:", i, end="\r"
-        )  # carriage return to overwrite the previous number with the new one
-        # Check if any key pressed in console and then compare if key is "e"
-        if msvcrt.kbhit():
-            key = msvcrt.getch()
-            if key == b"e":
-                print("Walls down stopped!!.")
-                return
+        stdscr.addstr(0, 0, f"Kitchen walls closing, press key `e` to stop or you will be locked.\nTime left: {i}")
+        stdscr.refresh()
+        # Check for keyboard input
+        key = stdscr.getch()
+        if key == ord('e'):
+            curses.endwin()
+            moves_counter += 1
+            return
         time.sleep(1)
+
+    curses.endwin()
     countdown_completed = True
-    return
 
 
 # function for countdown that begins when player enters the room
@@ -112,13 +114,12 @@ def initialize_game():
     os.system("cls" if os.name == "nt" else "clear")
     print(
         """
-            You start the game in the Hall and can go to different rooms.
-            Potion will give you 20 more energy, and you can load an extra 5 bullets from the Hall.
-            You will need to defeat monsters and require a key to escape via the garden.
-            The kitchen door will be locked automatically in 5 seconds if you don't press the 'e' key.
+You start the game in the Hall and can go to different rooms.
+Potion will give you 20 more energy, and you can load an extra 5 bullets from the Hall.
+You will need to defeat monsters and require a key to escape via the garden.
+The kitchen door will be locked automatically in 5 seconds if you don't press the 'e' key.
         """
     )
-    showInstructions()
 
 initialize_game()
 
@@ -127,6 +128,7 @@ def play_game():
     global currentRoom, player_name, moves_counter, gun
     while True:
         printMap()
+        showInstructions()
         showStatus()
 
         move = ""
@@ -214,7 +216,8 @@ def play_game():
         # Check if player has enough energy to defeat a potential monster
         if currentRoom in rooms and "monster" in rooms[currentRoom]["item"]:
             # checking and getting gun instance from player inventory
-            if (isinstance(item, Gun) for item in player.get_inventory()):
+            if any(isinstance(item, Gun) for item in player.get_inventory()):
+                print(player.get_inventory())
                 print("Pulling Gun!")
                 # bullets need to kill monster
                 monster_kill_bullets = random.randint(4, 7)
@@ -241,7 +244,7 @@ def play_game():
                     break
 
             else:
-                print("monster killed you, GAME OVER!")
+                print("You don't have a gun to fight with the monster\nMonster killed you, GAME OVER!")
                 break
 
         # Check if player has the key to escape (only in the 'Garden' room)

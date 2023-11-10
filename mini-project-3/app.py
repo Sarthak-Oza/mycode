@@ -1,11 +1,12 @@
 from flask import Flask, request, render_template, send_from_directory, url_for, redirect, jsonify, session, flash
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
 import sqlite3
 import os
 import datetime
 import uuid
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='/static')
 
 # Get the directory of this file
 script_directory = os.path.dirname(__file__)
@@ -68,7 +69,7 @@ def upload_and_list_files():
                 file_ext = file.filename.split(".")
                 name = file_ext[0]
                 ext = file_ext[1]
-                filename = f"{name}-{str(uuid.uuid4())[:4]}.{ext}"
+                filename = secure_filename(f"{name}-{str(uuid.uuid4())[:4]}.{ext}")
             else:
                 filename = f"{file.filename}-{str(uuid.uuid4())[:4]}"
 
@@ -138,6 +139,7 @@ def details_file(filename):
             print(file_details)
 
         if file_details:
+            # unpacking details from file_details
             filename, filepath, filesize, timestamp = file_details
             file_info = {
                 "filename": filename, 
@@ -158,7 +160,7 @@ def details_file(filename):
 def edit_file(filename):
     # data from fetch request
     data = request.get_json()
-    new_filename = data.get('new_filename')
+    new_filename = secure_filename(data.get('new_filename'))
 
     print("New Filename:", new_filename)
 
