@@ -18,7 +18,8 @@ def ask_question(question, options):
                 print(f"{option}. {option_description}")
 
             print()
-            choice = int(input(Back.GREEN + f"Enter the number of your choice (1 - 5):" + Style.RESET_ALL + " "))
+            # converting string input to int
+            choice = int(input(Back.GREEN + f"Enter the number of your choice ({CHOICE_MIN} - {CHOICE_MAX}):" + Style.RESET_ALL + " "))
             print()
 
             if choice in options:
