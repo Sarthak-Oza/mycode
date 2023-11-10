@@ -222,6 +222,7 @@ def signup():
         email = request.form.get('email')
         password = request.form.get('password')
 
+        # encrypting password
         hashed_password = generate_password_hash(password, method='pbkdf2:sha1', salt_length=8)
 
         try:
@@ -272,7 +273,7 @@ def signin():
 @app.route('/signout')
 def signout():
     
-    if 'user_email' not in session:
+    if not session:
         flash('You are not signed in.')
         return render_template('signin.html')
 

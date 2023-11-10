@@ -48,6 +48,7 @@
     </ul>
 
     <script>
+        // call /details endpoint to get file details
         function fetchDetails(filename) {
             const detailsDiv = document.getElementById(filename + '_details');
             const nameSpan = document.getElementById(filename + '_name');
@@ -72,6 +73,7 @@
             }
         }
 
+        // function to display/toggle details
         function toggleRenameInput(filename) {
         const renameInput = document.getElementById(filename + '_rename');
         const renameButton = document.getElementById(filename + '_save');
@@ -86,6 +88,7 @@
         }
     }
 
+    // function to call /edit endpoint to update filename
     function renameFile(filename) {
     const editInput = document.getElementById(filename + '_rename');
     const newFilename = editInput.value;
@@ -122,6 +125,7 @@
     });
 }
 
+    // function to call /delete endpoint to delete file
     function deleteFile(filename) {
         const confirmation = confirm('Are you sure you want to delete this file?');
 
