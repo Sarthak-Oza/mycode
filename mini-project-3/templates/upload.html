@@ -36,11 +36,11 @@
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                       </div>
                     <input type="text" id="{{ file[1] }}_rename" style="display: none;" placeholder="Enter New File Name" >
-                    <a href="javascript:void(0);" id="{{ file[1] }}_save"onclick="renameFile('{{ file[1] }}')" style="display: none;" class="btn btn-success">Save</a>
+                    <a id="{{ file[1] }}_save"onclick="renameFile('{{ file[1] }}')" style="display: none;" class="btn btn-success">Save</a>
                     <a href="{{ url_for('download_file', filename=file[1]) }}" download class="btn btn-primary">Download</a>
-                    <a href="javascript:void(0);" onclick="fetchDetails('{{ file[1] }}')" class="btn btn-primary">Details</a>
-                    <a href="javascript:void(0);" onclick="toggleRenameInput('{{ file[1] }}')" class="btn btn-primary">Edit</a>
-                    <a href="javascript:void(0);" onclick="deleteFile('{{ file[1] }}')" class="btn btn-danger">Delete</a>
+                    <a onclick="fetchDetails('{{ file[1] }}')" class="btn btn-primary">Details</a>
+                    <a onclick="toggleRenameInput('{{ file[1] }}')" class="btn btn-primary">Edit</a>
+                    <a onclick="deleteFile('{{ file[1] }}')" class="btn btn-danger">Delete</a>
                     
                 </div>
             </li>
@@ -90,9 +90,6 @@
     function renameFile(filename) {
     const editInput = document.getElementById(filename + '_rename');
     const newFilename = editInput.value;
-
-
-        console.log(filename)
     
         // Send a PUT request to edit the file name on the server
         fetch(`/edit/${filename}`, {

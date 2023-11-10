@@ -51,6 +51,7 @@ def check_upload_folder():
 
 @app.route('/')
 def index():
+    # check if signedin and go to files
     return redirect(url_for('signin'))
 
 @app.route('/files', methods=['GET', 'POST'])
@@ -78,9 +79,8 @@ def upload_and_list_files():
 
             file.save(filepath)
 
+            # converting from Bytes to KB
             file_size = round(os.path.getsize(filepath)/1024, 2)
-
-            print(file_size)
 
             current_timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
@@ -94,6 +94,7 @@ def upload_and_list_files():
             except:
                 print("Error while adding file to DB")
                 # if error, remove the file from the system
+                # ? might need to roll back
                 os.remove(filepath)
 
             return redirect(url_for('upload_and_list_files'))
@@ -121,6 +122,7 @@ def upload_and_list_files():
 # file download route
 @app.route('/download/<filename>')
 def download_file(filename):
+    # check for user if logged in and handle it(GET request)
     user_folder = os.path.join(app.config['UPLOAD_FOLDER'], session['user_email'])
     filepath = os.path.join(user_folder, filename)
     # download with option as_attachment=True
@@ -154,6 +156,7 @@ def details_file(filename):
 
 @app.route('/edit/<filename>', methods=["PUT"])
 def edit_file(filename):
+    # data from fetch request
     data = request.get_json()
     new_filename = data.get('new_filename')
 
@@ -218,7 +221,7 @@ def signup():
 
                 # Create a directory for the new user
                 user_folder = os.path.join(app.config['UPLOAD_FOLDER'], email)
-                os.makedirs(user_folder, exist_ok=True)
+                os.makedirs(user_folder)
 
                 flash('Signup successful! Please sign in.')
                 return redirect(url_for('signin'))
