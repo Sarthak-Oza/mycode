@@ -25,23 +25,11 @@ gun = None
 moves_counter = 0
 
 
-def showInstructions():
-    # print a main menu and the commands
-    print(
-        """
-RPG Game
-========
-Commands:
-go [direction]
-get [item]
-quit
-        """
-    )
-
-
 def showStatus():
-    print("---------------------------")
+    print("----------RPG Game----------")
     print("You are in the " + currentRoom)
+    print("---------------------------")
+    print("Commands:\ngo [direction]\nget [item]\nquit ")
     print("---------------------------")
 
     # getting directions player can go to
@@ -49,7 +37,7 @@ def showStatus():
         "You can go to: "
         + " or ".join(
             [
-                key
+                f"{key} ({rooms[currentRoom][key]})"
                 for key in rooms[currentRoom].keys()
                 if key in {"north", "south", "east", "west"}
             ]
@@ -88,7 +76,7 @@ def crushing_walls():
     stdscr = curses.initscr()
     stdscr.nodelay(1)  # Set non-blocking mode for keyboard input
     for i in range(5, 0, -1):
-        stdscr.addstr(0, 0, f"Kitchen walls closing, press key `e` to stop or you will be locked.\nTime left: {i}")
+        stdscr.addstr(0, 0, f"*** Kitchen walls closing, press key `e` to stop or you will be locked.***\nTime left: {i}")
         stdscr.refresh()
         # Check for keyboard input
         key = stdscr.getch()
@@ -112,6 +100,7 @@ def countdown():
 
 def initialize_game():
     os.system("cls" if os.name == "nt" else "clear")
+    printMap()
     print(
         """
 You start the game in the Hall and can go to different rooms.
@@ -127,10 +116,7 @@ initialize_game()
 def play_game():
     global currentRoom, player_name, moves_counter, gun
     while True:
-        printMap()
-        showInstructions()
         showStatus()
-
         move = ""
         while move == "":
             move = input(">")
@@ -152,10 +138,11 @@ def play_game():
                     )
                     countdown()
 
-            else:
-                print("You can't go that way!")
+                os.system("cls" if os.name == "nt" else "clear")    
 
-            os.system("cls" if os.name == "nt" else "clear")
+            else:
+                print("*** You can't go that way! ***\n")
+
 
         # get instructions handling
         elif move[0] == "get":
@@ -164,48 +151,51 @@ def play_game():
                 if move[1] == "potion":
                     if player.get_energy() < 80:
                         player.energize(20)
-                        print("Got 20 more energy!")
+                        print("*** Got 20 more energy! ***\n")
                     else:
-                        print("You do not need it, you already have enough energy!")
+                        print("*** You do not need it, you already have enough energy! ***")
                         continue
 
                 if move[1] == "gun":
                     gun = Gun()
                     player.add_to_inventory(gun)
                     rooms[currentRoom]["item"].remove(move[1])
-                    print("Took the gun!")
+                    print("*** Took the gun! ***\n")
                     continue
 
                 # finding gun from player inventory and getting bullets
                 if move[1] == "bullets":
-                    gun_item = next(
-                        item for item in player.get_inventory() if isinstance(item, Gun)
-                    )
-                    gun_item.load_gun(5)
-                    rooms[currentRoom]["item"].remove(move[1])
-                    print("Added 5 bullets to the gun!")
-                    continue
+                    if any(isinstance(item, Gun) for item in player.get_inventory()):
+                        gun_item = next(
+                            item for item in player.get_inventory() if isinstance(item, Gun)
+                        )
+                        gun_item.load_gun(5)
+                        rooms[currentRoom]["item"].remove(move[1])
+                        print("*** Added 5 bullets to the gun! ***\n")
+                        continue
+                    else:
+                        print("*** You need a gun to load bullets! ***\n")
+                        continue
 
                 player.inventory += [move[1]]
 
-                print(move[1] + " added to inventory!")
+                print(f"*** {move[1]} added to inventory! ***\n")
 
                 rooms[currentRoom]["item"].remove(move[1])
 
                 # increase moves counter
                 moves_counter += 1
             else:
-                print("Can't get " + move[1] + "!")
+                print(f"*** Can't get {move[1]}! ***\n")
 
-            os.system("cls" if os.name == "nt" else "clear")
 
         # quit the game
         elif move[0] == "quit":
-            print("Exiting the game!")
+            print("*** Exiting the game! ***\n")
             break
 
         else:
-            print("Not a valid Instruction!")
+            print("*** Not a valid Instruction! ***\n")
             continue
 
         # if e not pressed while in Kitchen, player will be locked in the room and lost the game
@@ -217,7 +207,6 @@ def play_game():
         if currentRoom in rooms and "monster" in rooms[currentRoom]["item"]:
             # checking and getting gun instance from player inventory
             if any(isinstance(item, Gun) for item in player.get_inventory()):
-                print(player.get_inventory())
                 print("Pulling Gun!")
                 # bullets need to kill monster
                 monster_kill_bullets = random.randint(4, 7)
@@ -234,17 +223,17 @@ def play_game():
                     gun_item.shoot(monster_kill_bullets)
                     player.deenergize(monster_kill_bullets * 10)
                     if player.get_energy() <= 0:
-                        print("No energy left, YOU LOST!")
+                        print("*** No energy left, YOU LOST! ***\n")
                         break
-                    print("Monster Defeated!")
+                    print("*** Monster Defeated! ***")
                     rooms[currentRoom]["item"].remove("monster")
 
                 else:
-                    print("Gun empty, no more bullets. Monster killed you!, Game Over!")
+                    print("*** Gun empty, no more bullets. Monster killed you!, Game Over! ***\n")
                     break
 
             else:
-                print("You don't have a gun to fight with the monster\nMonster killed you, GAME OVER!")
+                print("*** You don't have a gun to fight with the monster\nMonster killed you, GAME OVER! ***\n")
                 break
 
         # Check if player has the key to escape (only in the 'Garden' room)
@@ -254,7 +243,7 @@ def play_game():
                 print(f"Total Moves: {moves_counter}")
                 break
             else:
-                print("You need a key to escape!")
+                print("*** You need a key to escape! ***\n")
 
 
 if __name__ == "__main__":
