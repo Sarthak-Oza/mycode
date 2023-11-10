@@ -254,12 +254,9 @@ def signin():
                 cursor = conn.execute('SELECT * FROM users WHERE email = ?', (email,))
                 user = cursor.fetchone()
 
-                print(user)
-
                 if user and check_password_hash(user[3], password):
                     session['user_email'] = user[2]  
                     flash('Signin successful!')
-                    print(("session", dict(session)))
                     return redirect(url_for('upload_and_list_files'))
                 else:
                     # render singin page with flash message
