@@ -26,6 +26,7 @@ app.config['DATABASE'] = os.path.join(script_directory, 'file_storage.db')
 def init_db():
     try:
         with sqlite3.connect(app.config['DATABASE']) as conn:
+            # create files and users table if not exists
             conn.executescript('''
                 CREATE TABLE IF NOT EXISTS files (
                     id INTEGER PRIMARY KEY,
@@ -56,9 +57,13 @@ def check_upload_folder():
 
 @app.route('/')
 def index():
-    # check if signedin and go to files
-    return redirect(url_for('signin'))
+    # check if there is user loggedin with session and redirect 
+    if session:
+        return redirect(url_for("upload_and_list_files"))
+    else:
+        return redirect(url_for('signin'))
 
+# route to display and upload files
 @app.route('/files', methods=['GET', 'POST'])
 def upload_and_list_files():
     check_upload_folder() 
@@ -96,8 +101,7 @@ def upload_and_list_files():
                     conn.commit()
             except:
                 print("Error while adding file to DB")
-                # if error, remove the file from the system
-                # ? might need to roll back
+
                 os.remove(filepath)
 
             return redirect(url_for('upload_and_list_files'))
@@ -131,6 +135,7 @@ def download_file(filename):
     # download with option as_attachment=True
     return send_from_directory(user_folder, filename, as_attachment=True)
 
+# route to display files details
 @app.route('/details/<filename>')
 def details_file(filename):
     print(filename)
@@ -157,7 +162,7 @@ def details_file(filename):
     else:
         return "File not found"
 
-
+# route to edit file name
 @app.route('/edit/<filename>', methods=["PUT"])
 def edit_file(filename):
     # data from fetch request
@@ -187,6 +192,7 @@ def edit_file(filename):
     else:
         abort(400, "New file name not provided!")
 
+# route to delete file
 @app.route('/delete/<filename>', methods=["DELETE"])
 def delete_file(filename):
     print("Delete route")
@@ -208,6 +214,7 @@ def delete_file(filename):
     else:
         return jsonify({"error": "Please provide file name"})
 
+# signup route
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     if request.method == 'POST':
@@ -234,7 +241,7 @@ def signup():
 
     return render_template('signup.html')
 
-
+# sign in route
 @app.route('/signin', methods=['GET', 'POST'])
 def signin():
     if request.method == 'POST':
@@ -261,6 +268,7 @@ def signin():
 
     return render_template('signin.html')
 
+# signout route
 @app.route('/signout')
 def signout():
     
