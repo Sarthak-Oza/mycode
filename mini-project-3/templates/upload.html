@@ -49,7 +49,6 @@
 
     <script>
         function fetchDetails(filename) {
-            console.log(filename)
             const detailsDiv = document.getElementById(filename + '_details');
             const nameSpan = document.getElementById(filename + '_name');
             const timestampSpan = document.getElementById(filename + '_timestamp');
@@ -100,17 +99,12 @@
     },
     })
     .then(response => {
-        if (response.ok) {
-            console.log("here")
-            return response.json();
+        if (response.status === 400) {
+            const renameError = document.getElementById("rename-error")
+            renameError.style.display = "block";
+            throw new Error("No new file name provided")
         } else {
-            console.log("Error!")
-            // const renameError = document.getElementById("rename-error")
-            
-            // renameError.style.display = "block";
-            
-
-            // window.location.href = `/files`; 
+            return response.json();
         }
     })
     .then(data => {

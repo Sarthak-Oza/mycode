@@ -1,6 +1,7 @@
-from flask import Flask, request, render_template, send_from_directory, url_for, redirect, jsonify, session, flash
+from flask import Flask, request, render_template, send_from_directory, url_for, redirect, jsonify, session, flash, abort
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
+from dotenv import load_dotenv
 import sqlite3
 import os
 import datetime
@@ -11,8 +12,11 @@ app = Flask(__name__, static_url_path='/static')
 # Get the directory of this file
 script_directory = os.path.dirname(__file__)
 
+# load environment variables from .env
+load_dotenv()
+
 # session security key
-app.secret_key = 'secretkey' 
+app.secret_key = os.environ.get('SECRET_KEY')
 
 # path for upload folder and DB and storing to app's config object
 app.config['UPLOAD_FOLDER'] = os.path.join(script_directory, 'uploads')
@@ -77,14 +81,12 @@ def upload_and_list_files():
             user_folder = os.path.join(app.config['UPLOAD_FOLDER'], session['user_email'])
             filepath = os.path.join(user_folder, filename)
 
-
             file.save(filepath)
 
             # converting from Bytes to KB
             file_size = round(os.path.getsize(filepath)/1024, 2)
 
             current_timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
 
             try:
                 with sqlite3.connect(app.config['DATABASE']) as conn:
@@ -183,8 +185,7 @@ def edit_file(filename):
         return jsonify({"filename": filename})
 
     else:
-        return {}
-
+        abort(400, "New file name not provided!")
 
 @app.route('/delete/<filename>', methods=["DELETE"])
 def delete_file(filename):
